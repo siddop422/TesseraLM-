@@ -1,0 +1,10 @@
+{
+  "name": "TesseraLM-Nano",
+  "target_vocab_size": 400,
+  "d_model": 128,
+  "n_layers": 3,
+  "n_heads": 4,
+  "max_seq_len": 128,
+  "dropout": 0.05,
+  "batch_size": 8
+}

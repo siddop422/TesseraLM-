@@ -1,0 +1,1 @@
+import torch\nfrom torch import nn\n\ndef quantize_dynamic_int8(model: nn.Module) -> nn.Module:\n    if next(model.parameters()).device.type != 'cpu':\n        raise ValueError('Move the model to CPU before dynamic quantization')\n    return torch.ao.quantization.quantize_dynamic(model, {nn.Linear}, dtype=torch.qint8)\n

@@ -1,70 +1,68 @@
 # TesseraLM
 
-**An experimental decoder-only Transformer that trains and runs locally.**
+**A small, experimental decoder-only Transformer with a local ChatGPT-style browser interface.**
 
-TesseraLM is an open-source research project with its own tokenizer, Transformer implementation, CPU training pipeline, checkpoint loader, text generator, and browser chat interface. It does not call ChatGPT, Claude, Gemini, Ollama, or a hosted inference API.
+TesseraLM contains its own Transformer architecture, byte-level BPE tokenizer, CPU training pipeline, checkpoint loader, autoregressive sampler, and local browser chat UI. It does not call ChatGPT, Claude, Gemini, Ollama, or a hosted inference API.
 
-> **Model status:** TesseraLM-Nano is a very small experimental language model, not a capable general-purpose assistant. It was trained for 101 optimizer steps on the included 7.6 KB demonstration corpus. Expect weak, repetitive, or nonsensical generations.
+> **Important model limitation:** TesseraLM-Nano is a tiny research model, not a capable general-purpose assistant. The initial experiment trained 661,120 parameters for 101 optimizer steps on the included 7.6 KB project-authored corpus. It has not been instruction-tuned or broadly evaluated, so its responses may be incoherent, repetitive, or incorrect.
 
-## Browser chat
+## Run the ChatGPT-style HTML interface (Windows)
 
-Run the local server and open the ChatGPT-style interface:
+1. Install 64-bit Python 3.10–3.13.
+2. Double-click install.bat once. It creates a virtual environment and installs CPU PyTorch.
+3. Double-click start.bat. If there is no checkpoint yet, it trains a fresh Nano checkpoint from the included sample corpus, then starts the local model server and opens the browser.
+4. The chat opens at http://127.0.0.1:8765. If it does not open automatically, enter that address in your browser.
 
-1. Install Python 3.11 or newer.
-2. Run `install.bat`.
-3. Run `start.bat`.
-4. Your browser opens at **http://127.0.0.1:8765**.
+The HTML page is the chat client; the Python process loads the actual neural-network weights and generates tokens. The page alone cannot run the model. Prompts remain on your computer because the server binds to loopback by default.
 
-The browser talks to the Python inference server on loopback. The HTML page alone does not contain the neural network; the Python process loads the actual model checkpoint and performs generation.
+Features: conversation history, new chat, search and delete chats, streamed generation, stop, regenerate, copy, Markdown/code display, export to Markdown, temperature and sampling controls, and live model status. On mobile, the history sidebar becomes a slide-out panel.
 
-Features include conversation history in browser storage, streaming responses, stop generation, regeneration, copying, Markdown/code formatting, export to Markdown, adjustable sampling settings, and a local model status indicator.
+## Train
 
-## Train from scratch
-
-Run `train.bat`. The default Nano configuration is intended for small CPU experiments. Training writes a checkpoint under `checkpoints/`. For larger experiments, use a machine with more RAM and CPU/GPU capacity.
-
-## Project layout
-
-- `model/` — decoder-only Transformer and model configuration
-- `tokenizer/` — trainable byte-pair tokenizer
-- `training/` — dataset preparation and training loop
-- `inference/` — checkpoint loading and autoregressive generation
-- `quantization/` — experimental dynamic INT8 helper
-- `ui/` — local HTTP/SSE server and browser chat interface
-- `configs/` — model-size presets
-- `examples/` — tiny demonstration training corpus
-- `tests/` — automated tests
-
-## Hardware
-
-CPU inference is supported. On very low-memory systems, close other applications and use short responses. Training quality and speed are strongly limited by the tiny corpus and small number of training steps. The included 4 GB preset is experimental and may still be slow on older Celeron-class processors.
-
-## Verification
-
-Run:
+Run train.bat, or use:
 
 ```bash
+python -m training.train --data examples/seed_corpus.txt --config configs/nano.json --steps 101 --output checkpoints/nano.pt
+```
+
+The model and tokenizer are written to checkpoints/nano.pt and checkpoints/nano.tokenizer.json. Keep those files together. The included run verifies the training/inference pipeline; it is not intended to demonstrate broad language ability.
+
+## Test
+
+Install the development requirements and run:
+
+```bash
+python -m pip install -r requirements-dev.txt
 python -m pytest -q
 ```
 
-Run the browser server without opening a browser:
+## Architecture
 
-```bash
-python -m ui.server --no-browser
-```
+- Decoder-only Transformer with causal multi-head self-attention.
+- Pre-normalized residual blocks, GELU feed-forward layers, learned position embeddings.
+- Tied token embedding and vocabulary projection.
+- Trainable byte-level BPE tokenizer.
+- Temperature, top-k, top-p, and repetition-penalty sampling.
+- Optional dynamic INT8 quantization helper for CPU Linear layers.
 
-Health information is available at `/health`; streamed chat generation uses `POST /api/chat`.
+## Hardware and limitations
 
-## Model and dataset disclosure
+CPU inference is supported. On a 4 GB RAM computer, PyTorch itself can consume substantial memory; close other applications and use short generations. A tiny model can be trained for pipeline experiments on a CPU, but meaningful multi-billion-parameter pretraining requires much more compute, data, and memory.
 
-- Architecture: decoder-only Transformer with causal self-attention and learned positional embeddings.
-- Tokenizer: project-local BPE implementation.
-- Training data: `examples/seed_corpus.txt`, a short project-authored demonstration corpus.
-- Training steps: 101 optimizer steps in the packaged experiment.
-- Intended use: education and experimentation, not production deployment or factual assistance.
+The bundled seed corpus is original project-authored demonstration text. Any additional training dataset must be reviewed for licensing and provenance before use. Do not use the model for medical, legal, financial, or other high-stakes decisions.
 
-See [docs/MODEL_CARD.md](docs/MODEL_CARD.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), and [docs/TRAINING.md](docs/TRAINING.md).
+## Project layout
+
+- model/ — Transformer implementation
+- tokenizer/ — byte-level BPE tokenizer
+- training/ — tokenizer training and model training loop
+- inference/ — checkpoint loading and token generation
+- quantization/ — dynamic INT8 helper
+- ui/ — local HTML chat and loopback server
+- configs/ — Nano architecture preset
+- examples/ — project-authored sample training corpus
+- tests/ and docs/ — smoke tests and documentation
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See LICENSE.
