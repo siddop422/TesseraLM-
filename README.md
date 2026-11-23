@@ -8,7 +8,7 @@ TesseraLM contains its own Transformer architecture, byte-level BPE tokenizer, C
 
 ## Run the ChatGPT-style HTML interface (Windows)
 
-1. Install 64-bit Python 3.10–3.13.
+1. Install 64-bit Python 3.11–3.14.
 2. Double-click install.bat once. It creates a virtual environment and installs CPU PyTorch.
 3. Double-click start.bat. If there is no checkpoint yet, it trains a fresh Nano checkpoint from the included sample corpus, then starts the local model server and opens the browser.
 4. The chat opens at http://127.0.0.1:8765. If it does not open automatically, enter that address in your browser.

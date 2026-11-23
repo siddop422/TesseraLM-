@@ -7,7 +7,7 @@ name = "tesseralm"
 version = "1.0.0"
 description = "A tiny decoder-only Transformer language model with local browser chat"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = ["torch>=2.2.0"]
 license = { file = "LICENSE" }
 
